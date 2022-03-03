@@ -1,0 +1,29 @@
+version: "3"
+services:
+  broker:
+    build: ./broker/conf
+    ports:
+      - "1883:1883"
+    command: mosquitto
+    networks:
+      mqtt_net:
+        ipv4_address: 172.19.0.11
+  publisher:
+    build: ./publisher/conf
+    command: sh -c 'while :; do mosquitto_pub -h broker -t "topic/test" -m "hello mqtt"; sleep 3; done'
+    networks:
+      mqtt_net:
+        ipv4_address: 172.19.0.12
+  subscriber:
+    build: ./subscriber/conf
+    command: mosquitto_sub -h broker -t "topic/test" -d
+    networks:
+      mqtt_net:
+        ipv4_address: 172.19.0.13
+  
+networks:
+  mqtt_net:
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16  
+    
